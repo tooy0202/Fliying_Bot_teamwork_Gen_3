@@ -1,0 +1,19 @@
+{
+	"extension": {
+		"version": "0.7.2025041600",
+		"json": 2
+	},
+	"project": {
+		"name": "Fliying_Bot_teamwork_Gen_3",
+		"description": "",
+		"creationDate": "12/24/2025, 1:48:03 PM",
+		"platform": "IQ2",
+		"language": "cpp",
+		"slot": 5,
+		"sdkVersion": "IQ2_20250520_15_00_00",
+		"cpp": {
+			"includePath": [],
+			"printf_float": false
+		}
+	}
+}
