@@ -227,10 +227,9 @@ void Drop_down()
     while (MotorPin.velocity(vex::velocityUnits::pct) > 1)
     {
         MotorPin.spin(reverse);
-        wait(1, msec);
+        wait(100, msec);
     }
     // MotorPin.spinFor(forward, 155.0, degrees, false);
-    wait(0.2, seconds);
     Pneumatic_Pin_Beam.retract(cylinder1);
     MotorPin.setStopping(coast);
     MotorPin.stop(coast);
