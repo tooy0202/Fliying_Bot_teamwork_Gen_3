@@ -93,8 +93,8 @@ bool front_back, pin, phase, beamOn, isBusy, blink, boot, autobeam, stop, stand_
 void Place_beam()
 {
     stop = true;
-    MotorLeft.stop();
-    MotorRight.stop();
+    MotorLeft.stop(hold);
+    MotorRight.stop(hold);
     front_back = true;
     MotorBeam.setVelocity(45.0, percent);
     guide.retract(cylinder1);
@@ -412,7 +412,7 @@ int seting()
     MotorBeam.setStopping(hold);
     MotorLeft.setStopping(coast);
     MotorRight.setStopping(coast);
-    guide.retract(cylinder1);
+    guide.extend(cylinder1);
     guide.retract(cylinder2);
     wait(250, msec);
     Pneumatic_Pin_Beam.retract(cylinder1);
@@ -611,10 +611,13 @@ void EUp_pressed()
     MotorPin.spinFor(forward, 80.0, degrees);
     MotorLeft.setVelocity(100, percent);
     MotorRight.setVelocity(100, percent);
-    MotorLeft.spinFor(reverse, 100.0, degrees, false);
-    MotorRight.spinFor(reverse, 100.0, degrees);
+    MotorLeft.spinFor(reverse, 200.0, degrees, false);
+    MotorRight.spinFor(reverse, 200.0, degrees);
     guide.extend(cylinder2);
-    pinUpF = false;
+    Drop_down();
+    Rup = 0.0;
+    Rdown = 0.0;
+    pin = true;
     stop = false;
     // }
     // else
