@@ -750,9 +750,14 @@ void ControllerButtonR3_pressed()
         if (Rup == 1.0)
         {
             guide.retract(cylinder2);
-            MotorPin.spinFor(forward, 535.0, degrees, false);
-            wait(1.25, seconds);
+            MotorPin.spinFor(forward, 600.0, degrees, false);
+            wait(0.8, seconds);
+            stop = true;
+            MotorLeft.stop(coast);
+            MotorRight.stop(coast);
+            wait(0.35, seconds);
             Pneumatic_Pin_Beam.retract(cylinder1);
+            stop = false;
             // front_back = false;
             wait(0.4, seconds);
             MotorPin.spinFor(reverse, 635.0, degrees, false);
