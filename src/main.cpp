@@ -87,7 +87,7 @@ int Screen_precision = 0, Console_precision = 0;
 
 float Rup, Rdown, Lup, Ldown, R3, Kspeed;
 
-bool front_back, pin, phase, beamOn, isBusy, blink, boot, autobeam, stop, stand_off_up, start_stand_off_up, autoBeamY, stakeONGo, MakeY, pinUpF;
+bool front_back, pin, phase, beamOn, isBusy, blink, boot, autobeam, stop, stand_off_up, start_stand_off_up, autoBeamY, stakeONGo, MakeY, pinUpF, Eup;
 
 // User defined function
 void Place_beam()
@@ -122,7 +122,7 @@ void Place_beam()
 void Grab_Beam_up()
 {
     MotorBeam.setStopping(hold);
-    MotorBeam.spinFor(reverse, 300.0, degrees, true);
+    MotorBeam.spinFor(reverse, 325.0, degrees, true);
     guide.retract(cylinder1);
     isBusy = false;
 }
@@ -210,6 +210,7 @@ void Rup_Init()
 // User defined function
 void Drop_down()
 {
+    Eup = true;
     MotorPin.resetPosition();
     MotorLeft.setStopping(hold);
     MotorRight.setStopping(hold);
@@ -286,11 +287,7 @@ void Spin_Robot()
     front_back = false;
     if (Rup >= 1.0)
     {
-        guide.retract(cylinder2);
-        wait(0.2, seconds);
-        MotorPin.spinFor(forward, 155.0, degrees, true);
-        MotorPin.setStopping(coast);
-        Pneumatic_Pin_Beam.retract(cylinder1);
+        Drop_down();
         Rup = 0.0;
         Rdown = 0.0;
     }
@@ -424,6 +421,7 @@ int seting()
     phase = true;
     beamOn = true;
     isBusy = false;
+    Eup = false;
     Rup = 0.0;
     Rdown = 0.0;
     Lup = 1.0;
@@ -627,49 +625,58 @@ void RDown_pressed()
 // }
 void EUp_pressed()
 {
-  Brain.Timer.reset();
-  stop = true;
-  Pneumatic_Pin_Beam.extend(cylinder1);
-  MotorPin.spinFor(forward, 80.0, degrees);
-  MotorLeft.setVelocity(100, percent);
-  MotorRight.setVelocity(100, percent);
-  MotorLeft.spinFor(reverse, 200.0, degrees, false);
-  MotorRight.spinFor(reverse, 200.0, degrees);
-  guide.extend(cylinder2);
-  //----
-  MotorPin.resetPosition();
-  MotorLeft.setStopping(hold);
-  MotorRight.setStopping(hold);
-  wait(0.35, seconds);
-  // MotorPin.setStopping(coast);
-  MotorPin.setVelocity(100, percent);
-  // MotorPin.spinFor(reverse, 220.0, degrees, false);
-  MotorPin.spinFor(reverse, 50.0, degrees, false);
-  wait(0.1, seconds);
-  guide.retract(cylinder2);
-  MotorPin.spinFor(reverse, 170.0, degrees, false);
-  wait(250, msec);
-  MotorPin.setVelocity(100, percent);
-  MotorPin.spin(reverse);
-  while (MotorPin.velocity(vex::velocityUnits::pct) > 1)
+  if (Eup)
   {
-    MotorPin.spin(reverse);
-    wait(100, msec);
+    MotorPin.spinFor(forward, 95.0, degrees, true);
+    Eup = false;
   }
-  // MotorPin.spinFor(forward, 155.0, degrees, false);
-  MotorPin.setStopping(coast);
-  MotorPin.stop(coast);
-  // wait(0.3, seconds);
-  MotorLeft.setStopping(coast);
-  MotorRight.setStopping(coast);
-  stop = false;
-  wait(1, seconds);
-  Pneumatic_Pin_Beam.retract(cylinder1);
-  MotorPin.setPosition(0.0, degrees);
-  //----
-  Rup = 0.0;
-  Rdown = 0.0;
-  pin = true;
+  else
+  {
+    Brain.Timer.reset();
+    stop = true;
+    Pneumatic_Pin_Beam.extend(cylinder1);
+    MotorPin.spinFor(forward, 80.0, degrees);
+    MotorLeft.setVelocity(100, percent);
+    MotorRight.setVelocity(100, percent);
+    MotorLeft.spinFor(reverse, 200.0, degrees, false);
+    MotorRight.spinFor(reverse, 200.0, degrees);
+    guide.extend(cylinder2);
+    stop = false;
+    //----
+    MotorPin.resetPosition();
+    MotorLeft.setStopping(hold);
+    MotorRight.setStopping(hold);
+    wait(0.35, seconds);
+    // MotorPin.setStopping(coast);
+    MotorPin.setVelocity(100, percent);
+    // MotorPin.spinFor(reverse, 220.0, degrees, false);
+    MotorPin.spinFor(reverse, 50.0, degrees, false);
+    wait(0.1, seconds);
+    guide.retract(cylinder2);
+    MotorPin.spinFor(reverse, 170.0, degrees, false);
+    wait(250, msec);
+    MotorPin.setVelocity(100, percent);
+    MotorPin.spin(reverse);
+    while (MotorPin.velocity(vex::velocityUnits::pct) > 1)
+    {
+      MotorPin.spin(reverse);
+      wait(100, msec);
+    }
+    // MotorPin.spinFor(forward, 155.0, degrees, false);
+    MotorPin.setStopping(coast);
+    MotorPin.stop(coast);
+    // wait(0.3, seconds);
+    MotorLeft.setStopping(coast);
+    MotorRight.setStopping(coast);
+    wait(0.5, seconds);
+    Pneumatic_Pin_Beam.retract(cylinder1);
+    MotorPin.setPosition(0.0, degrees);
+    //----
+    Rup = 0.0;
+    Rdown = 0.0;
+    pin = true;
+    Eup = true;
+  }
 }
 
 // "when Controller AxisD changed" hat block
@@ -695,11 +702,12 @@ void ControllerDChanged()
 {
     if (!isBusy)
     {
+        Eup = false;
         if (Controller.AxisD.position() >= 90.0)
         {
             guide.retract(cylinder2);
             MotorPin.resetPosition();
-            MotorPin.setVelocity(45, percent);
+            MotorPin.setVelocity(60, percent);
             wait(350, msec);
             MotorPin.spinFor(reverse, 122.0, degrees, true);
             // MotorPin.spinFor(115.0, degrees, true);
@@ -798,13 +806,12 @@ void ControllerButtonR3_pressed()
             guide.retract(cylinder2);
             MotorPin.spinFor(forward, 600.0, degrees, false);
             wait(0.8, seconds);
-            stop = true;
             MotorLeft.stop(coast);
             MotorRight.stop(coast);
             wait(0.35, seconds);
             Pneumatic_Pin_Beam.retract(cylinder1);
-            stop = false;
             // front_back = false;
+            isBusy = false;
             wait(0.4, seconds);
             MotorPin.spinFor(reverse, 635.0, degrees, false);
             wait(0.4, seconds);
@@ -818,7 +825,6 @@ void ControllerButtonR3_pressed()
             pin = true;
             wait(0.1, seconds);
         }
-        isBusy = false;
     }
 }
 
